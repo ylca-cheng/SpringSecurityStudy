@@ -19,6 +19,7 @@
   <modules>
     <module>springsecuritydemo</module>
     <module>springsecurityoauht2demo</module>
+    <module>jjwtdemo</module>
   </modules>
 
 
