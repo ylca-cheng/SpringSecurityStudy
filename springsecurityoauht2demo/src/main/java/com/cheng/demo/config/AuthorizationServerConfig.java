@@ -57,7 +57,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 // 授权码模式
                 // .authorizedGrantTypes("authorization_code");
                 // 密码模式
-                .authorizedGrantTypes("password");
+                // .authorizedGrantTypes("password");
+                // 多模式
+                .authorizedGrantTypes("password","refresh_token","authorization_code");
     }
 
     /**
