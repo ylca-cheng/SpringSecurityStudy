@@ -1,0 +1,20 @@
+server:
+  port: 8081
+  servlet:
+    session:
+      cookie:
+        # 防止cookie冲突导致登录验证不通过
+        name: OAUTH-CLIENT-SESSION01
+
+#与授权服务器对应的配置
+oauth2-server-url: http://localhost:8080
+security:
+  oauth2:
+    client:
+      client-id: admin
+      client-secret: 112233
+      user-authorization-uri: ${oauth2-server-url}/oauth/authorize
+      access-token-uri: ${oauth2-server-url}/oauth/token
+    resource:
+      jwt:
+        key-uri: ${oauth2-server-url}/oauth/token_key
