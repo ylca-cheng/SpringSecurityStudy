@@ -61,3 +61,100 @@ http://localhost:8080/oauth/token
 ![img.png](png/4.png)
 
 到此密码模式结束
+
+# 四、使用redis存储token
+## 4.1、引入依赖
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-pool2</artifactId>
+</dependency>
+```
+## 4.2、添加配置和配置文件
+```yml
+spring:
+  redis:
+    host: 127.0.0.1
+```
+```java
+package com.cheng.demo.config;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
+
+@RequiredArgsConstructor
+@Configuration
+public class RedisConfig {
+
+    private final RedisConnectionFactory redisConnectionFactory;
+
+    @Bean
+    public RedisTokenStore redisTokenStore(){
+        return new RedisTokenStore(redisConnectionFactory);
+    }
+}
+```
+```java
+@Override
+public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    endpoints.authenticationManager(authenticationManager)
+            .userDetailsService(userService)
+            // 将token存储到redis
+            .tokenStore(redisTokenStore);
+}
+```
+## 4.3、测试
+![img.png](png/5.png)
+![img.png](png/6.png)
+![img.png](png/7.png)
+
+# 五、使用jwt
+**注意：将上面关于redis的配置注释掉**
+
+## 5.1、配置jwtTokenStore
+```java
+package com.cheng.demo.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+@Configuration
+public class JwtTokenStoreConfig {
+
+    @Bean
+    public JwtTokenStore jwtTokenStore(){
+        return new JwtTokenStore(jwtAccessTokenConverter());
+    }
+
+    @Bean
+    public JwtAccessTokenConverter jwtAccessTokenConverter(){
+        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        // 配置jwt使用的秘钥
+        jwtAccessTokenConverter.setSigningKey("test_key");
+        return jwtAccessTokenConverter;
+    }
+}
+```
+```java
+@Override
+public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    endpoints.authenticationManager(authenticationManager)
+            .userDetailsService(userService)
+            // 将token存储到redis
+            // .tokenStore(redisTokenStore);
+            // 使用jwt
+            .tokenStore(jwtTokenStore)
+            .accessTokenConverter(jwtAccessTokenConverter);
+}
+```
+
+
