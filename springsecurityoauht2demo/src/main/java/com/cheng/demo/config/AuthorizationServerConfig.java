@@ -9,10 +9,15 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 授权服务器配置
@@ -33,6 +38,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private final JwtTokenStore jwtTokenStore;
 
     private final JwtAccessTokenConverter jwtAccessTokenConverter;
+
+    private final JwtTokenEnhancer jwtTokenEnhancer;
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -61,12 +68,18 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
      */
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        List<TokenEnhancer> delegates = new ArrayList<>();
+        delegates.add(jwtTokenEnhancer);
+        delegates.add(jwtAccessTokenConverter);
+        tokenEnhancerChain.setTokenEnhancers(delegates);
         endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userService)
                 // 将token存储到redis
                 // .tokenStore(redisTokenStore);
                 // 使用jwt
                 .tokenStore(jwtTokenStore)
-                .accessTokenConverter(jwtAccessTokenConverter);
+                .accessTokenConverter(jwtAccessTokenConverter)
+                .tokenEnhancer(tokenEnhancerChain);
     }
 }
