@@ -12,7 +12,7 @@ public class RedisConfig {
 
     private final RedisConnectionFactory redisConnectionFactory;
 
-    @Bean
+    // @Bean
     public RedisTokenStore redisTokenStore(){
         return new RedisTokenStore(redisConnectionFactory);
     }

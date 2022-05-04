@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 /**
@@ -26,7 +28,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     private final UserService userService;
 
-    private final RedisTokenStore redisTokenStore;
+    // private final RedisTokenStore redisTokenStore;
+
+    private final JwtTokenStore jwtTokenStore;
+
+    private final JwtAccessTokenConverter jwtAccessTokenConverter;
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -49,6 +55,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     /**
      * 密码模式配置
+     *
      * @param endpoints
      * @throws Exception
      */
@@ -57,6 +64,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userService)
                 // 将token存储到redis
-                .tokenStore(redisTokenStore);
+                // .tokenStore(redisTokenStore);
+                // 使用jwt
+                .tokenStore(jwtTokenStore)
+                .accessTokenConverter(jwtAccessTokenConverter);
     }
 }
